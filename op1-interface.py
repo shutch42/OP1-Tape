@@ -5,7 +5,7 @@ pygame.init()
 
 clock = pygame.time.Clock()
 
-size = width, height = 640, 480
+size = width, height = 800, 480
 gray = 120, 120, 120
 
 pygame.mouse.set_visible(False)
@@ -13,10 +13,10 @@ screen = pygame.display.set_mode(size, pygame.FULLSCREEN)
 
 play_icon = pygame.image.load("img/play.png").convert_alpha()
 play_icon = pygame.transform.smoothscale(play_icon, (50, 50))
-play_rect = play_icon.get_rect(center=(320, 240))
+play_rect = play_icon.get_rect(center=(400, 240))
 
-reel1 = Reel(150, 170, 0)
-reel2 = Reel(490, 170, 45)
+reel1 = Reel(200, 170, 0)
+reel2 = Reel(600, 170, 45)
 
 done = False
 play = False

@@ -2,7 +2,7 @@ import pygame
 
 
 class Reel:
-    REEL_SIZE = (250, 250)
+    REEL_SIZE = (300, 300)
     IMAGE_FILE = "img/tape_reel.png"
     REEL_SPEED = 2
 
