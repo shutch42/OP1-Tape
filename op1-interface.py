@@ -11,8 +11,12 @@ gray = 120, 120, 120
 pygame.mouse.set_visible(False)
 screen = pygame.display.set_mode(size, pygame.FULLSCREEN)
 
+play_icon = pygame.image.load("img/play.png").convert_alpha()
+play_icon = pygame.transform.smoothscale(play_icon, (50, 50))
+play_rect = play_icon.get_rect(center=(320, 240))
+
 reel1 = Reel(150, 170, 0)
-reel2 = Reel(490, 170, 0)
+reel2 = Reel(490, 170, 45)
 
 done = False
 play = False
@@ -34,6 +38,7 @@ while not done:
     if play:
         reel1.rotate()
         reel2.rotate()
+        screen.blit(play_icon, play_rect)
     
     # Render reels
     screen.blit(reel1.img, reel1.rect)
