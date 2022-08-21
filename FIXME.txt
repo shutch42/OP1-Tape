@@ -1,0 +1,8 @@
+Problem:
+
+The number of audio chunks per second is not sync-ed with the number of frames per second. Attempting to play audio at a different rate sounds bad.
+
+Some ideas:
+- Calculate chunk size to reasonably match frame rate
+- Make a parallel solution, so audio plays on a separate core at a constant rate
+- Idk, maybe a data structure to better track frame/audio position
