@@ -8,6 +8,7 @@ clock = pygame.time.Clock()
 
 size = width, height = 800, 480
 gray = 120, 120, 120
+white = 255, 255, 255
 
 pygame.mouse.set_visible(False)
 # screen = pygame.display.set_mode(size, pygame.FULLSCREEN)
@@ -16,6 +17,10 @@ screen = pygame.display.set_mode(size)
 play_icon = pygame.image.load("img/play.png").convert_alpha()
 play_icon = pygame.transform.smoothscale(play_icon, (50, 50))
 play_rect = play_icon.get_rect(center=(400, 220))
+
+font = pygame.font.Font("freesansbold.ttf", 32)
+text = font.render("00:00:00", True, white, gray)
+text_rect = text.get_rect()
 
 reel1 = Reel(200, 170, 0)
 reel2 = Reel(600, 170, 45)
@@ -29,6 +34,7 @@ while not done:
     for event in pygame.event.get():
         # Check for exit
         if event.type == pygame.QUIT:
+            music.close()
             done = True
         
         # Toggle play/pause
@@ -52,6 +58,8 @@ while not done:
     # FIXME: Tape across and reader need different RGB values
     # pygame.draw.rect(screen, (39.6, 42.7, 47.1), (200, 260, 400, 10))
     # pygame.draw.rect(screen, (80, 82, 85.1), (385, 260, 30, 30))
+    
+    screen.blit(text, text_rect)
     screen.blit(reel1.img, reel1.rect)
     screen.blit(reel2.img, reel2.rect)
 

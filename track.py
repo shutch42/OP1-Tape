@@ -9,21 +9,24 @@ class Track:
 
 	def __init__(self):
 		self.wf = wave.open("audio/side_b.wav")
-		p = pyaudio.PyAudio()
+		self.p = pyaudio.PyAudio()
 
-		self.stream = p.open(format = p.get_format_from_width(self.wf.getsampwidth()), channels=self.wf.getnchannels(), rate=self.wf.getframerate(), output=True)
+		self.stream = self.p.open(format = self.p.get_format_from_width(self.wf.getsampwidth()), channels=self.wf.getnchannels(), rate=self.wf.getframerate(), output=True)
 		self.data = self.wf.readframes(self.CHUNK_SIZE)
 		self.curr_time = 0
 
+		self.open = Event()
+		self.open.set()
 		self.play_state = Event()
 		self.record_state = Event()
-		self.thread = Thread(target = self.handle_tape, args = [self.play_state, self.record_state])
+		self.thread = Thread(target = self.handle_tape, args = [self.open, self.play_state, self.record_state])
 		self.thread.start()
 
-	def handle_tape(self, play_state, record_state):
-		while True:
+	def handle_tape(self, open, play_state, record_state):
+		while open.is_set():
 			if play_state.is_set():
 				self.play_chunk()
+		return
 
 	def play_chunk(self):
 		self.stream.write(self.data)
@@ -34,3 +37,11 @@ class Track:
 	
 	def pause(self):
 		self.play_state.clear()
+
+	def close(self):
+		self.open.clear()
+		self.thread.join()
+		self.stream.stop_stream()
+		self.stream.close()
+		self.p.terminate()
+	
