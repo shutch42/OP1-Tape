@@ -34,6 +34,7 @@ music = Track()
 done = False
 play = False
 speed = False
+reverse = False
 
 while not done:
     for event in pygame.event.get():
@@ -64,6 +65,13 @@ while not done:
             reel1.speed = 2
             reel2.speed = 2
             speed = False
+
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
+            reverse = True
+            music.reverse()
+        elif reverse:
+            music.play()
+            reverse = False
 
     # Clear screen
     screen.fill(gray)
