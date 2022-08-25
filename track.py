@@ -13,7 +13,7 @@ class Track:
 
         self.p = pyaudio.PyAudio()
 
-        self.fast_forward_stream = self.p.open(format=self.p.get_format_from_width(self.wf.getsampwidth()),
+        self.fast_stream = self.p.open(format=self.p.get_format_from_width(self.wf.getsampwidth()),
                                                channels=self.wf.getnchannels(), rate=self.wf.getframerate()*5, output=True, frames_per_buffer=self.CHUNK_SIZE)
 
         self.slow_stream = self.p.open(format=self.p.get_format_from_width(self.wf.getsampwidth()),
@@ -29,26 +29,29 @@ class Track:
         self.open_state = Event()
         self.open_state.set()
 
-        self.play_state = Event()
-        self.fast_forward_state = Event()
-        self.reverse_state = Event()
-        self.record_state = Event()
-        self.stop_state = Event()
+        self.signals = {"play": Event(),
+                        "reverse": Event(),
+                        "fast forward": Event(),
+                        "rewind": Event(),
+                        "record": Event(),
+                        "stop": Event()}
+
         self.thread = Thread(target=self.handle_tape,
-                             args=[self.open_state, self.play_state, self.fast_forward_state, self.reverse_state,
-                                   self.stop_state, self.record_state])
+                             args=[self.open_state, self.signals])
         self.thread.start()
 
-    def handle_tape(self, open_state, play_state, fast_forward_state, reverse_state, stop_state, record_state):
+    def handle_tape(self, open_state, signals):
         while open_state.is_set():
-            if stop_state.is_set():
+            if signals["stop"].is_set():
                 self.stop()
-            if play_state.is_set():
+            if signals["play"].is_set():
                 self.play_chunk()
-            if fast_forward_state.is_set():
+            if signals["reverse"].is_set():
+                self.reverse_chunk()
+            if signals["fast forward"].is_set():
                 self.fast_forward_chunk()
-            if reverse_state.is_set():
-                self.play_chunk_reverse()
+            if signals["rewind"].is_set():
+                self.rewind_chunk()
         return
 
     def play_chunk(self):
@@ -57,12 +60,43 @@ class Track:
         self.stream.write(self.data, self.CHUNK_SIZE)
 
     def fast_forward_chunk(self):
-        self.stream = self.fast_forward_stream
+        self.stream = self.fast_stream
         self.data = self.wf.readframes(self.CHUNK_SIZE)
         self.stream.write(self.data, self.CHUNK_SIZE)
 
-    def play_chunk_reverse(self):
-        self.stream = self.fast_forward_stream
+    def reverse_chunk(self):
+        self.stream = self.normal_stream
+        # Get current position
+        position = self.wf.tell()
+
+        # Move file position back two chunks
+        self.wf.setpos(position - self.CHUNK_SIZE * 2)
+
+        # Read chunk from new file position
+        self.data = self.wf.readframes(self.CHUNK_SIZE)
+
+        # Reverse chunk data:
+        # Since wave byte strings are stored as (frequency, position) per channel at each point in time,
+        # the number of bytes stored at each time point is dependent on the number of channels.
+        # An easy way to calculate the number of bytes at each point is to divide the byte string length by chunk size.
+        # After we have this number, we can each time point that is stored in the data string
+
+        bytes_per_unit_time = int(len(self.data) / self.CHUNK_SIZE)
+
+        reverse_bytes = b""
+        for i in range(self.CHUNK_SIZE + 1):
+            data_point = self.data[-bytes_per_unit_time:]
+            self.data = self.data[:-bytes_per_unit_time]
+            reverse_bytes += data_point
+
+        if reverse_bytes == '':
+            reverse_bytes = chr(0) * bytes_per_unit_time
+
+        # Write reversed chunk to stream
+        self.stream.write(reverse_bytes, self.CHUNK_SIZE)
+
+    def rewind_chunk(self):
+        self.stream = self.fast_stream
         # Get current position
         position = self.wf.tell()
 
@@ -93,28 +127,38 @@ class Track:
         self.stream.write(reverse_bytes, self.CHUNK_SIZE)
 
     def play(self):
-        self.play_state.set()
-        self.fast_forward_state.clear()
-        self.reverse_state.clear()
+        self.signals["play"].set()
+        self.signals["reverse"].clear()
+        self.signals["fast forward"].clear()
+        self.signals["rewind"].clear()
 
     def pause(self):
-        self.play_state.clear()
-        self.fast_forward_state.clear()
-        self.reverse_state.clear()
-
-    def reverse(self):
-        self.reverse_state.set()
-        self.play_state.clear()
-        self.fast_forward_state.clear()
+        self.signals["play"].clear()
+        self.signals["reverse"].clear()
+        self.signals["fast forward"].clear()
+        self.signals["rewind"].clear()
 
     def stop(self):
         self.wf.rewind()
         self.pause()
 
+    def reverse(self):
+        self.signals["reverse"].set()
+        self.signals["play"].clear()
+        self.signals["fast forward"].clear()
+        self.signals["rewind"].clear()
+
     def fast_forward(self):
-        self.fast_forward_state.set()
-        self.play_state.clear()
-        self.reverse_state.clear()
+        self.signals["fast forward"].set()
+        self.signals["play"].clear()
+        self.signals["reverse"].clear()
+        self.signals["rewind"].clear()
+
+    def rewind(self):
+        self.signals["rewind"].set()
+        self.signals["play"].clear()
+        self.signals["reverse"].clear()
+        self.signals["fast forward"].clear()
 
     def get_time(self):
         return self.wf.tell() / self.AUDIO_RATE

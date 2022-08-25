@@ -58,7 +58,7 @@ while not done:
                 print("Checking moves from state: Play")
                 if buttons.play_pressed(key) and buttons.shift_pressed(mods):
                     state = "Reverse"
-                    # FIXME: Reverse needs to be added in track / switched to rewind
+                    track.reverse()
                 elif buttons.play_pressed(key):
                     state = "Pause"
                     track.pause()
@@ -69,7 +69,7 @@ while not done:
                     state = "Play and Record"
                 elif buttons.left_pressed(key):
                     track_manip = "RW"
-                    track.reverse()
+                    track.rewind()
                 elif buttons.right_pressed(key):
                     track_manip = "FF"
                     track.fast_forward()
@@ -79,8 +79,8 @@ while not done:
             elif state == "Pause":
                 print("Checking moves from state: Pause")
                 if buttons.play_pressed(key) and buttons.shift_pressed(mods):
-                    # FIXME
                     state = "Reverse"
+                    track.reverse()
                 elif buttons.play_pressed(key):
                     state = "Play"
                     track.play()
@@ -91,7 +91,7 @@ while not done:
                     state = "Arm Record"
                 elif buttons.left_pressed(key):
                     track_manip = "RW"
-                    track.reverse()
+                    track.rewind()
                 elif buttons.right_pressed(key):
                     track_manip = "FF"
                     track.fast_forward()
@@ -110,7 +110,7 @@ while not done:
                     state = "Reverse and Record"
                 elif buttons.left_pressed(key):
                     track_manip = "RW"
-                    track.reverse()
+                    track.rewind()
                 elif buttons.right_pressed(key):
                     track_manip = "FF"
                     track.fast_forward()
