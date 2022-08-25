@@ -13,11 +13,14 @@ class Track:
 
         self.p = pyaudio.PyAudio()
 
-        self.fast_stream = self.p.open(format=self.p.get_format_from_width(self.wf.getsampwidth()),
-                                       channels=self.wf.getnchannels(), rate=self.wf.getframerate()*5, output=True)
+        self.fast_forward_stream = self.p.open(format=self.p.get_format_from_width(self.wf.getsampwidth()),
+                                               channels=self.wf.getnchannels(), rate=self.wf.getframerate()*5, output=True, frames_per_buffer=self.CHUNK_SIZE)
+
+        self.slow_stream = self.p.open(format=self.p.get_format_from_width(self.wf.getsampwidth()),
+                                       channels=self.wf.getnchannels(), rate=int(self.AUDIO_RATE/2), output=True, frames_per_buffer=self.CHUNK_SIZE)
 
         self.normal_stream = self.p.open(format=self.p.get_format_from_width(self.wf.getsampwidth()),
-                                         channels=self.wf.getnchannels(), rate=self.wf.getframerate(), output=True)
+                                         channels=self.wf.getnchannels(), rate=self.wf.getframerate(), output=True, frames_per_buffer=self.CHUNK_SIZE)
 
         self.stream = self.normal_stream
 
@@ -27,29 +30,39 @@ class Track:
         self.open_state.set()
 
         self.play_state = Event()
+        self.fast_forward_state = Event()
         self.reverse_state = Event()
         self.record_state = Event()
         self.stop_state = Event()
         self.thread = Thread(target=self.handle_tape,
-                             args=[self.open_state, self.play_state, self.reverse_state,
+                             args=[self.open_state, self.play_state, self.fast_forward_state, self.reverse_state,
                                    self.stop_state, self.record_state])
         self.thread.start()
 
-    def handle_tape(self, open_state, play_state, reverse_state, stop_state, record_state):
+    def handle_tape(self, open_state, play_state, fast_forward_state, reverse_state, stop_state, record_state):
         while open_state.is_set():
             if stop_state.is_set():
                 self.stop()
             if play_state.is_set():
                 self.play_chunk()
+            if fast_forward_state.is_set():
+                self.fast_forward_chunk()
             if reverse_state.is_set():
                 self.play_chunk_reverse()
         return
 
     def play_chunk(self):
+        self.stream = self.normal_stream
         self.data = self.wf.readframes(self.CHUNK_SIZE)
-        self.stream.write(self.data)
+        self.stream.write(self.data, self.CHUNK_SIZE)
+
+    def fast_forward_chunk(self):
+        self.stream = self.fast_forward_stream
+        self.data = self.wf.readframes(self.CHUNK_SIZE)
+        self.stream.write(self.data, self.CHUNK_SIZE)
 
     def play_chunk_reverse(self):
+        self.stream = self.fast_forward_stream
         # Get current position
         position = self.wf.tell()
 
@@ -68,35 +81,40 @@ class Track:
         bytes_per_unit_time = int(len(self.data)/self.CHUNK_SIZE)
 
         reverse_bytes = b""
-        for i in range(self.CHUNK_SIZE):
+        for i in range(self.CHUNK_SIZE+1):
             data_point = self.data[-bytes_per_unit_time:]
             self.data = self.data[:-bytes_per_unit_time]
             reverse_bytes += data_point
 
+        if reverse_bytes == '':
+            reverse_bytes = chr(0)*bytes_per_unit_time
+
         # Write reversed chunk to stream
-        self.stream.write(reverse_bytes)
+        self.stream.write(reverse_bytes, self.CHUNK_SIZE)
 
     def play(self):
         self.play_state.set()
+        self.fast_forward_state.clear()
         self.reverse_state.clear()
 
     def pause(self):
         self.play_state.clear()
+        self.fast_forward_state.clear()
         self.reverse_state.clear()
 
     def reverse(self):
         self.reverse_state.set()
         self.play_state.clear()
+        self.fast_forward_state.clear()
 
     def stop(self):
         self.wf.rewind()
-        self.data = self.wf.readframes(self.CHUNK_SIZE)
+        self.pause()
 
     def fast_forward(self):
-        self.stream = self.fast_stream
-
-    def reset_speed(self):
-        self.stream = self.normal_stream
+        self.fast_forward_state.set()
+        self.play_state.clear()
+        self.reverse_state.clear()
 
     def get_time(self):
         return self.wf.tell() / self.AUDIO_RATE

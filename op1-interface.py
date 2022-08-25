@@ -61,13 +61,16 @@ while not done:
             reel1.speed = 4
             reel2.speed = 4
         elif speed:
-            music.reset_speed()
+            music.play()
             reel1.speed = 2
             reel2.speed = 2
             speed = False
 
         if event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
-            reverse = True
+            if not reverse:
+                reverse = True
+                music.pause()
+                # time.sleep(.1)
             music.reverse()
         elif reverse:
             music.play()
