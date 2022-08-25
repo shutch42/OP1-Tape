@@ -11,18 +11,38 @@ clock = pygame.time.Clock()
 done = False
 
 state = "Stop"
+track_manip = "None"
 
 while not done:
-    track_manip = "None"
-
     for event in pygame.event.get():
+        # Check for exit
         if event.type == pygame.QUIT:
             track.close()
             done = True
 
+        # Check for fast-forward/rewind states
+        if track_manip == "None":
+            pass
+        elif event.type == pygame.KEYDOWN and buttons.right_pressed(event.key) and track_manip == "FF":
+            pass
+        elif event.type == pygame.KEYDOWN and buttons.left_pressed(event.key) and track_manip == "RW":
+            pass
+        else:
+            track_manip = "None"
+            if state == "Play":
+                track.play()
+            elif state == "Reverse":
+                print("Fixme")
+            elif state == "Pause":
+                track.pause()
+            else:
+                raise Exception("Track state is not valid after a speed change: " + state)
+
+        # Switch between other tape states determined by key presses
         if event.type == pygame.KEYDOWN:
             key = event.key
             mods = pygame.key.get_mods()
+
             if state == "Stop":
                 print("Checking moves from state: Stop")
                 if buttons.play_pressed(key):
@@ -100,7 +120,6 @@ while not done:
             else:
                 raise Exception("State not recognized: "+state)
 
-
     gui.clear_screen()
 
     if state == "Stop":
@@ -118,15 +137,6 @@ while not done:
             gui.render_pause()
         elif state == "Reverse":
             gui.render_reverse()
-    # if stop:
-    #     gui.update_clock("00:00:00")
-    #     gui.render_pause()
-    # else:
-    #     gui.update_clock(track.get_time_string())
-    #     if play:
-    #         gui.render_play()
-    #     else:
-    #         gui.render_pause()
 
     gui.display()
     clock.tick(60)
