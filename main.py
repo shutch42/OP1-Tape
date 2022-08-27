@@ -1,7 +1,7 @@
 import pygame
 import buttons
 from gui import GUI
-from track import Track
+from track_old import Track
 
 gui = GUI()
 track = Track()
