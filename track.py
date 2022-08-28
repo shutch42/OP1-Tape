@@ -35,12 +35,19 @@ class Track:
             ww.writeframes(block)
         ww.close()
 
+    def stop(self):
+        self.position = 0
+
     def read_block(self):
+        if self.position >= len(self.blocks) - 1:
+            return b""
         block = self.blocks[self.position]
         self.position += 1
         return block
 
     def read_block_reverse(self):
+        if self.position <= 0:
+            return b""
         block = self.blocks[self.position]
         self.position -= 1
 
