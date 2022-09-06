@@ -1,3 +1,4 @@
+import audioop
 import wave
 from pathlib import Path
 
@@ -6,7 +7,7 @@ audio_dir = Path("audio")
 
 class Track:
     # FIXME: Change to mono track when implemented in tape
-    CHUNK_SIZE = 1024
+    CHUNK_SIZE = 256
     NUM_CHANNELS = 2
     SAMPLE_WIDTH = 2
     AUDIO_RATE = 44100
@@ -41,13 +42,16 @@ class Track:
     def read_block(self):
         if self.position >= len(self.blocks) - 1:
             return b""
+
         block = self.blocks[self.position]
         self.position += 1
+
         return block
 
     def read_block_reverse(self):
         if self.position <= 0:
             return b""
+
         block = self.blocks[self.position]
         self.position -= 1
 
@@ -60,3 +64,14 @@ class Track:
             reverse_bytes += data_point
 
         return reverse_bytes
+
+    def record_block(self, block):
+        if self.position >= len(self.blocks) - 1:
+            return b""
+
+        curr_block = self.blocks[self.position]
+        combined_block = audioop.add(curr_block, block, self.SAMPLE_WIDTH)
+        self.blocks[self.position] = combined_block
+        self.position += 1
+
+        return combined_block

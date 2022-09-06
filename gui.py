@@ -20,6 +20,9 @@ class GUI:
         self.reverse_icon = pygame.transform.smoothscale(pygame.image.load("img/reverse.png").convert_alpha(),
                                                          self.ICON_SIZE)
 
+        self.record_icon = pygame.transform.smoothscale(pygame.image.load("img/record.png").convert_alpha(),
+                                                        self.ICON_SIZE)
+
         self.ff_icon = pygame.transform.smoothscale(pygame.image.load("img/fast-forward.png").convert_alpha(),
                                                     self.ICON_SIZE)
 
@@ -63,6 +66,12 @@ class GUI:
         self._render_reels()
 
     def render_pause(self):
+        self._render_clock()
+        self._render_reels()
+
+    def render_record(self):
+        self.rotate_reels(forward=True, high_speed=False)
+        self.screen.blit(self.record_icon, self.icon_rect)
         self._render_clock()
         self._render_reels()
 

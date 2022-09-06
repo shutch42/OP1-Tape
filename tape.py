@@ -9,9 +9,11 @@ class Tape:
         self.track1 = Track("side_b.wav")
         self.p = pyaudio.PyAudio()
 
+        # Change input_device_index to work with different inputs
+        # Currently it's set to my audio interface
         self.normal_stream = self.p.open(format=self.p.get_format_from_width(self.track1.SAMPLE_WIDTH),
                                          channels=self.track1.NUM_CHANNELS, rate=self.track1.AUDIO_RATE, input=True,
-                                         output=True, frames_per_buffer=self.track1.CHUNK_SIZE)
+                                         output=True, frames_per_buffer=self.track1.CHUNK_SIZE, input_device_index=8)
         self.fast_stream = self.p.open(format=self.p.get_format_from_width(self.track1.SAMPLE_WIDTH),
                                        channels=self.track1.NUM_CHANNELS, rate=self.track1.AUDIO_RATE*5, output=True,
                                        frames_per_buffer=self.track1.SAMPLE_WIDTH)
@@ -38,7 +40,10 @@ class Tape:
 
             if signals["play"].is_set():
                 if signals["forward"].is_set():
-                    self.play_chunk()
+                    if signals["record"].is_set():
+                        self.record_chunk()
+                    else:
+                        self.play_chunk()
                 else:
                     self.play_chunk_reverse()
 
@@ -48,6 +53,11 @@ class Tape:
 
     def play_chunk_reverse(self):
         data = self.track1.read_block_reverse()
+        self.stream.write(data)
+
+    def record_chunk(self):
+        recorded_chunk = self.stream.read(self.track1.CHUNK_SIZE, exception_on_overflow=False)
+        data = self.track1.record_block(recorded_chunk)
         self.stream.write(data)
 
     def play(self):
@@ -66,6 +76,12 @@ class Tape:
         self.signals["forward"].set()
         self.signals["fast"].clear()
         self.signals["record"].clear()
+
+    def record(self):
+        self.signals["play"].set()
+        self.signals["forward"].set()
+        self.signals["fast"].clear()
+        self.signals["record"].set()
 
     def reverse(self):
         self.signals["forward"].clear()
