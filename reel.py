@@ -10,7 +10,8 @@ class Reel:
         self.init_img = pygame.transform.smoothscale(img, self.REEL_SIZE)
         self.img = pygame.transform.rotate(self.init_img, angle)
         self.angle = angle
-        self.rect = self.img.get_rect(center=(center_x, center_y))
+        self.center = (center_x, center_y)
+        self.rect = self.img.get_rect(center=self.center)
 
     def rotate(self, forward=True, speed=2):
         if forward:
@@ -18,5 +19,5 @@ class Reel:
         else:
             self.angle -= speed
         self.img = pygame.transform.rotate(self.init_img, self.angle)
-        self.rect = self.img.get_rect(center=self.rect.center)
+        self.rect = self.img.get_rect(center=self.center)
 

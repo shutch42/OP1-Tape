@@ -51,7 +51,7 @@ while not done:
                 elif buttons.record_pressed(key):
                     state = "Arm Record"
                 elif buttons.right_pressed(key):
-                    state = "Play"
+                    state = "Pause"
                     track_manip = "FF"
                     tape.fast_forward()
             elif state == "Play":

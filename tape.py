@@ -6,7 +6,7 @@ import pyaudio
 
 class Tape:
     def __init__(self):
-        self.track1 = Track("side_b.wav")
+        self.track1 = Track("track_1.wav")
         self.p = pyaudio.PyAudio()
 
         # Change input_device_index to work with different inputs

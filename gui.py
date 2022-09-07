@@ -14,6 +14,8 @@ class GUI:
         # self.screen = pygame.display.set_mode(self.SCREEN_SIZE, pygame.FULLSCREEN)
         self.screen = pygame.display.set_mode(self.SCREEN_SIZE)
 
+        self.background = pygame.Surface(self.screen.get_size())
+
         self.play_icon = pygame.transform.smoothscale(pygame.image.load("img/play.png").convert_alpha(),
                                                       self.ICON_SIZE)
 
@@ -31,7 +33,7 @@ class GUI:
 
         self.icon_rect = self.play_icon.get_rect(center=(400, 200))
 
-        self.mono_font = pygame.font.Font("fonts/FreeMono.ttf", 32)
+        self.mono_font = pygame.font.Font("fonts/FreeMonoBold.ttf", 34)
         self.clock_text = self.mono_font.render("00:00:00", True, self.WHITE, self.GRAY)
         self.clock_rect = self.clock_text.get_rect(center=(400, 50))
 
@@ -39,7 +41,7 @@ class GUI:
         self.reel2 = Reel(600, 170, 45)
 
     def clear_screen(self):
-        self.screen.fill(self.GRAY)
+        self.background.fill(self.GRAY)
 
     def rotate_reels(self, forward, high_speed):
         if high_speed:
@@ -50,18 +52,18 @@ class GUI:
         self.reel2.rotate(forward, speed)
 
     def _render_reels(self):
-        self.screen.blit(self.reel1.img, self.reel1.rect)
-        self.screen.blit(self.reel2.img, self.reel2.rect)
+        self.background.blit(self.reel1.img, self.reel1.rect)
+        self.background.blit(self.reel2.img, self.reel2.rect)
 
     def update_clock(self, time):
         self.clock_text = self.mono_font.render(time, True, self.WHITE, self.GRAY)
 
     def _render_clock(self):
-        self.screen.blit(self.clock_text, self.clock_rect)
+        self.background.blit(self.clock_text, self.clock_rect)
 
     def render_play(self):
         self.rotate_reels(forward=True, high_speed=False)
-        self.screen.blit(self.play_icon, self.icon_rect)
+        self.background.blit(self.play_icon, self.icon_rect)
         self._render_clock()
         self._render_reels()
 
@@ -71,29 +73,29 @@ class GUI:
 
     def render_record(self):
         self.rotate_reels(forward=True, high_speed=False)
-        self.screen.blit(self.record_icon, self.icon_rect)
+        self.background.blit(self.record_icon, self.icon_rect)
         self._render_clock()
         self._render_reels()
 
     def render_ff(self):
         self.rotate_reels(forward=True, high_speed=True)
-        self.screen.blit(self.ff_icon, self.icon_rect)
+        self.background.blit(self.ff_icon, self.icon_rect)
         self._render_clock()
         self._render_reels()
 
     def render_rw(self):
         self.rotate_reels(forward=False, high_speed=True)
-        self.screen.blit(self.rw_icon, self.icon_rect)
+        self.background.blit(self.rw_icon, self.icon_rect)
         self._render_clock()
         self._render_reels()
 
     def render_reverse(self):
         self.rotate_reels(forward=False, high_speed=False)
-        self.screen.blit(self.reverse_icon, self.icon_rect)
+        self.background.blit(self.reverse_icon, self.icon_rect)
         self._render_clock()
         self._render_reels()
 
-    @staticmethod
-    def display():
+    def display(self):
+        self.screen.blit(self.background, (0, 0))
         pygame.display.flip()
 

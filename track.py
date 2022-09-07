@@ -8,7 +8,7 @@ audio_dir = Path("audio")
 class Track:
     # FIXME: Change to mono track when implemented in tape
     CHUNK_SIZE = 256
-    NUM_CHANNELS = 2
+    NUM_CHANNELS = 1
     SAMPLE_WIDTH = 2
     AUDIO_RATE = 44100
 
@@ -17,18 +17,22 @@ class Track:
         self.blocks = []
         self.position = 0
 
-        wr = wave.open(str(audio_dir / self.filename), "rb")
-
-        data = wr.readframes(self.CHUNK_SIZE)
-        while len(data) > 0:
-            self.blocks.append(data)
+        try:
+            wr = wave.open(str(audio_dir / self.filename), "rb")
             data = wr.readframes(self.CHUNK_SIZE)
+            while len(data) > 0:
+                self.blocks.append(data)
+                data = wr.readframes(self.CHUNK_SIZE)
 
-        wr.close()
+            wr.close()
+        except FileNotFoundError:
+            # Create 6 minute empty tape
+            chunk = b"\x00" * self.CHUNK_SIZE * self.SAMPLE_WIDTH
+            num_chunks = 6 * 60 * self.AUDIO_RATE // self.CHUNK_SIZE
+            self.blocks = [chunk]*num_chunks
 
     def save(self):
-        # ww = wave.open(audio_dir / self.filename, "wb")
-        ww = wave.open(str(audio_dir / "tmp.wav"), "wb")
+        ww = wave.open(str(audio_dir / self.filename), "w")
         ww.setnchannels(self.NUM_CHANNELS)
         ww.setsampwidth(self.SAMPLE_WIDTH)
         ww.setframerate(self.AUDIO_RATE)
