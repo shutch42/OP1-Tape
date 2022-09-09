@@ -45,7 +45,10 @@ class Tape:
                     else:
                         self.play_chunk()
                 else:
-                    self.play_chunk_reverse()
+                    if signals["record"].is_set():
+                        self.record_chunk_reverse()
+                    else:
+                        self.play_chunk_reverse()
 
     def play_chunk(self):
         data = self.track1.read_block()
@@ -58,6 +61,11 @@ class Tape:
     def record_chunk(self):
         recorded_chunk = self.stream.read(self.track1.CHUNK_SIZE, exception_on_overflow=False)
         data = self.track1.record_block(recorded_chunk)
+        self.stream.write(data)
+
+    def record_chunk_reverse(self):
+        recorded_chunk = self.stream.read(self.track1.CHUNK_SIZE, exception_on_overflow=False)
+        data = self.track1.record_block_reverse(recorded_chunk)
         self.stream.write(data)
 
     def play(self):
@@ -80,6 +88,12 @@ class Tape:
     def record(self):
         self.signals["play"].set()
         self.signals["forward"].set()
+        self.signals["fast"].clear()
+        self.signals["record"].set()
+
+    def record_reverse(self):
+        self.signals["play"].set()
+        self.signals["forward"].clear()
         self.signals["fast"].clear()
         self.signals["record"].set()
 

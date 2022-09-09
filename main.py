@@ -117,6 +117,7 @@ while not done:
                     tape.stop()
                 elif buttons.record_pressed(key):
                     state = "Reverse and Record"
+                    tape.record_reverse()
                 elif buttons.left_pressed(key):
                     track_manip = "RW"
                     tape.rewind()
@@ -125,6 +126,21 @@ while not done:
                     tape.fast_forward()
             elif state == "Reverse and Record":
                 # FIXME
+                if buttons.play_pressed(key) and buttons.shift_pressed(mods):
+                    state = "Reverse"
+                    tape.reverse()
+                elif buttons.play_pressed(key):
+                    state = "Play"
+                    tape.play()
+                elif buttons.stop_pressed(key):
+                    state = "Stop"
+                    tape.stop()
+                elif buttons.left_pressed(key):
+                    state = "RW"
+                    tape.rewind()
+                elif buttons.right_pressed(key):
+                    track_manip = "FF"
+                    tape.fast_forward()
                 print("Checking moves from state: Reverse and Record")
             else:
                 raise Exception("State not recognized: "+state)
@@ -148,6 +164,8 @@ while not done:
             gui.render_reverse()
         elif state == "Play and Record":
             gui.render_record()
+        elif state == "Reverse and Record":
+            gui.render_record_reverse()
 
     gui.display()
     clock.tick(60)

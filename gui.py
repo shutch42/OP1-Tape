@@ -77,6 +77,12 @@ class GUI:
         self._render_clock()
         self._render_reels()
 
+    def render_record_reverse(self):
+        self.rotate_reels(forward=False, high_speed=False)
+        self.background.blit(self.record_icon, self.icon_rect)
+        self._render_clock()
+        self._render_reels()
+
     def render_ff(self):
         self.rotate_reels(forward=True, high_speed=True)
         self.background.blit(self.ff_icon, self.icon_rect)
