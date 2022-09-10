@@ -40,7 +40,7 @@ while not done:
 
         # Switch between other tape states determined by key presses
         if event.type == pygame.KEYDOWN:
-            key = event.key
+            key = pygame.key.get_pressed()
             mods = pygame.key.get_mods()
 
             if state == "Stop":
@@ -105,7 +105,15 @@ while not done:
                     track_manip = "FF"
                     tape.fast_forward()
             elif state == "Arm Record":
-                # FIXME
+                # FIXME: Reverse record switches to pause
+                if buttons.shift_pressed(mods) and buttons.play_pressed(key):
+                    state = "Reverse and Record"
+                    tape.record_reverse()
+                elif buttons.play_pressed(key):
+                    state = "Play and Record"
+                    tape.record()
+                elif not buttons.record_pressed(key):
+                    state = "Pause"
                 print("Checking moves from state: Arm Record")
             elif state == "Reverse":
                 print("Checking moves from state: Reverse")
@@ -165,6 +173,8 @@ while not done:
             gui.render_record()
         elif state == "Reverse and Record":
             gui.render_record_reverse()
+        elif state == "Arm Record":
+            gui.render_arm_record()
 
     gui.display()
     clock.tick(60)
