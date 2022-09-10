@@ -117,7 +117,6 @@ while not done:
                     track_manip = "FF"
                     tape.fast_forward()
             elif state == "Arm Record":
-                # FIXME: Reverse record switches to pause
                 if keys["Shift"].pressed() and keys["Play"].pressed():
                     state = "Reverse and Record"
                     tape.record_reverse()
