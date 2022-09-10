@@ -125,7 +125,6 @@ while not done:
                     track_manip = "FF"
                     tape.fast_forward()
             elif state == "Reverse and Record":
-                # FIXME
                 if buttons.play_pressed(key) and buttons.shift_pressed(mods):
                     state = "Reverse"
                     tape.reverse()
