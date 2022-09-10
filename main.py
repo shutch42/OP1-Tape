@@ -1,7 +1,14 @@
 import pygame
-import buttons
+from buttons import Key, Mod
 from gui import GUI
 from tape import Tape
+
+keys = {"Play": Key(pygame.K_SPACE),
+        "Stop": Key(pygame.K_BACKSPACE),
+        "Record": Key(pygame.K_r),
+        "Shift": Mod(pygame.KMOD_SHIFT),
+        "Left": Key(pygame.K_LEFT),
+        "Right": Key(pygame.K_RIGHT)}
 
 gui = GUI()
 tape = Tape()
@@ -23,9 +30,9 @@ while not done:
         # Check for fast-forward/rewind states
         if track_manip == "None":
             pass
-        elif event.type == pygame.KEYDOWN and buttons.right_pressed(event.key) and track_manip == "FF":
+        elif event.type == pygame.KEYDOWN and keys["Right"].pressed() and track_manip == "FF":
             pass
-        elif event.type == pygame.KEYDOWN and buttons.left_pressed(event.key) and track_manip == "RW":
+        elif event.type == pygame.KEYDOWN and keys["Left"].pressed() and track_manip == "RW":
             pass
         else:
             track_manip = "None"
@@ -45,107 +52,107 @@ while not done:
 
             if state == "Stop":
                 print("Checking moves from state: Stop")
-                if buttons.play_pressed(key):
+                if keys["Play"].pressed():
                     state = "Play"
                     tape.play()
-                elif buttons.record_pressed(key):
+                elif keys["Record"].pressed():
                     state = "Arm Record"
-                elif buttons.right_pressed(key):
+                elif keys["Right"].pressed():
                     state = "Pause"
                     track_manip = "FF"
                     tape.fast_forward()
             elif state == "Play":
                 print("Checking moves from state: Play")
-                if buttons.play_pressed(key) and buttons.shift_pressed(mods):
+                if keys["Play"].pressed() and keys["Shift"].pressed():
                     state = "Reverse"
                     tape.reverse()
-                elif buttons.play_pressed(key):
+                elif keys["Play"].pressed():
                     state = "Pause"
                     tape.pause()
-                elif buttons.stop_pressed(key):
+                elif keys["Stop"].pressed():
                     state = "Stop"
                     tape.stop()
-                elif buttons.record_pressed(key):
+                elif keys["Record"].pressed():
                     state = "Play and Record"
                     tape.record()
-                elif buttons.left_pressed(key):
+                elif keys["Left"].pressed():
                     track_manip = "RW"
                     tape.rewind()
-                elif buttons.right_pressed(key):
+                elif keys["Right"].pressed():
                     track_manip = "FF"
                     tape.fast_forward()
             elif state == "Play and Record":
-                if buttons.play_pressed(key) and buttons.shift_pressed(mods):
+                if keys["Play"].pressed() and keys["Shift"].pressed():
                     state = "Reverse"
                     tape.reverse()
-                elif buttons.play_pressed(key):
+                elif keys["Play"].pressed():
                     state = "Play"
                     tape.play()
-                elif buttons.stop_pressed(key):
+                elif keys["Stop"].pressed():
                     state = "Stop"
                     tape.stop()
                 print("Checking moves from state: Play and Record")
             elif state == "Pause":
                 print("Checking moves from state: Pause")
-                if buttons.play_pressed(key) and buttons.shift_pressed(mods):
+                if keys["Play"].pressed() and keys["Shift"].pressed():
                     state = "Reverse"
                     tape.reverse()
-                elif buttons.play_pressed(key):
+                elif keys["Play"].pressed():
                     state = "Play"
                     tape.play()
-                elif buttons.stop_pressed(key):
+                elif keys["Stop"].pressed():
                     state = "Stop"
                     tape.stop()
-                elif buttons.record_pressed(key):
+                elif keys["Record"].pressed():
                     state = "Arm Record"
-                elif buttons.left_pressed(key):
+                elif keys["Left"].pressed():
                     track_manip = "RW"
                     tape.rewind()
-                elif buttons.right_pressed(key):
+                elif keys["Right"].pressed():
                     track_manip = "FF"
                     tape.fast_forward()
             elif state == "Arm Record":
                 # FIXME: Reverse record switches to pause
-                if buttons.shift_pressed(mods) and buttons.play_pressed(key):
+                if keys["Shift"].pressed() and keys["Play"].pressed():
                     state = "Reverse and Record"
                     tape.record_reverse()
-                elif buttons.play_pressed(key):
+                elif keys["Play"].pressed():
                     state = "Play and Record"
                     tape.record()
-                elif not buttons.record_pressed(key):
+                elif not keys["Record"].pressed():
                     state = "Pause"
                 print("Checking moves from state: Arm Record")
             elif state == "Reverse":
                 print("Checking moves from state: Reverse")
-                if buttons.play_pressed(key) and not buttons.shift_pressed(mods):
+                if keys["Play"].pressed() and not keys["Shift"].pressed():
                     state = "Play"
                     tape.play()
-                elif buttons.stop_pressed(key):
+                elif keys["Stop"].pressed():
                     state = "Stop"
                     tape.stop()
-                elif buttons.record_pressed(key):
+                elif keys["Record"].pressed():
                     state = "Reverse and Record"
                     tape.record_reverse()
-                elif buttons.left_pressed(key):
+                elif keys["Left"].pressed():
                     track_manip = "RW"
                     tape.rewind()
-                elif buttons.right_pressed(key):
+                elif keys["Right"].pressed():
                     track_manip = "FF"
                     tape.fast_forward()
             elif state == "Reverse and Record":
-                if buttons.play_pressed(key) and buttons.shift_pressed(mods):
+                if keys["Play"].pressed() and keys["Shift"].pressed():
                     state = "Reverse"
                     tape.reverse()
-                elif buttons.play_pressed(key):
+                elif keys["Play"].pressed():
                     state = "Play"
                     tape.play()
-                elif buttons.stop_pressed(key):
+                elif keys["Stop"].pressed():
                     state = "Stop"
                     tape.stop()
-                elif buttons.left_pressed(key):
+                elif keys["Left"].pressed():
                     state = "RW"
                     tape.rewind()
-                elif buttons.right_pressed(key):
+                elif keys["Right"].pressed():
                     track_manip = "FF"
                     tape.fast_forward()
                 print("Checking moves from state: Reverse and Record")
