@@ -3,6 +3,7 @@ from buttons import Key, Mod
 from gui import GUI
 from tape import Tape
 
+# Key bindings are set here. In the future, change this to GPIO pins.
 keys = {"Play": Key(pygame.K_SPACE),
         "Stop": Key(pygame.K_BACKSPACE),
         "Record": Key(pygame.K_r),
@@ -21,6 +22,11 @@ state = "Stop"
 track_manip = "None"
 
 while not done:
+
+    #######################################################################################
+    # The scary-looking section below is for handling key presses and tape state changes
+    #######################################################################################
+
     for event in pygame.event.get():
         # Check for exit
         if event.type == pygame.QUIT:
@@ -45,7 +51,6 @@ while not done:
             else:
                 raise Exception("Track state is not valid after a speed change: " + state)
 
-        # Switch between other tape states determined by key presses
         if event.type == pygame.KEYDOWN:
             key = pygame.key.get_pressed()
             mods = pygame.key.get_mods()
@@ -158,6 +163,12 @@ while not done:
                 print("Checking moves from state: Reverse and Record")
             else:
                 raise Exception("State not recognized: "+state)
+
+    ######################################################################################
+    # At this point, the button presses are handled and the updated state should be set
+    # Now, we just need to take this state information and display it in the GUI
+    # FIXME: Integrate the gui into the tape class for cleaner code
+    ######################################################################################
 
     gui.clear_screen()
 
