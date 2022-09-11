@@ -36,9 +36,11 @@ while not done:
         # Check for fast-forward/rewind states
         if track_manip == "None":
             pass
-        elif event.type == pygame.KEYDOWN and keys["Right"].pressed() and track_manip == "FF":
+        elif keys["Record"].pressed() and track_manip == "Record":
             pass
-        elif event.type == pygame.KEYDOWN and keys["Left"].pressed() and track_manip == "RW":
+        elif keys["Right"].pressed() and track_manip == "FF":
+            pass
+        elif keys["Left"].pressed() and track_manip == "RW":
             pass
         else:
             track_manip = "None"
@@ -78,7 +80,7 @@ while not done:
                     state = "Stop"
                     tape.stop()
                 elif keys["Record"].pressed():
-                    state = "Play and Record"
+                    track_manip = "Record"
                     tape.record()
                 elif keys["Left"].pressed():
                     track_manip = "RW"
@@ -163,11 +165,12 @@ while not done:
             else:
                 raise Exception("State not recognized: "+state)
 
-    ######################################################################################
+    #######################################################################################################
     # At this point, the button presses are handled and the updated state should be set
     # Now, we just need to take this state information and display it in the GUI
+    # Note: This CANNOT be handled in the states above, since they are only accessed during a button press
     # FIXME: Integrate the gui into the tape class for cleaner code
-    ######################################################################################
+    #######################################################################################################
 
     gui.clear_screen()
 
@@ -180,6 +183,8 @@ while not done:
             gui.render_ff()
         elif track_manip == "RW":
             gui.render_rw()
+        elif track_manip == "Record":
+            gui.render_record()
         elif state == "Play":
             gui.render_play()
         elif state == "Pause":

@@ -13,7 +13,7 @@ class Tape:
         # Currently it's set to my audio interface
         self.normal_stream = self.p.open(format=self.p.get_format_from_width(self.track1.SAMPLE_WIDTH),
                                          channels=self.track1.NUM_CHANNELS, rate=self.track1.AUDIO_RATE, input=True,
-                                         output=True, frames_per_buffer=self.track1.CHUNK_SIZE, input_device_index=8)
+                                         output=True, frames_per_buffer=self.track1.CHUNK_SIZE, input_device_index=6)
         self.fast_stream = self.p.open(format=self.p.get_format_from_width(self.track1.SAMPLE_WIDTH),
                                        channels=self.track1.NUM_CHANNELS, rate=self.track1.AUDIO_RATE*5, output=True,
                                        frames_per_buffer=self.track1.SAMPLE_WIDTH)
