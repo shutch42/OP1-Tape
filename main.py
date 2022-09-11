@@ -9,7 +9,9 @@ keys = {"Play": Key(pygame.K_SPACE),
         "Record": Key(pygame.K_r),
         "Shift": Mod(pygame.KMOD_SHIFT),
         "Left": Key(pygame.K_LEFT),
-        "Right": Key(pygame.K_RIGHT)}
+        "Right": Key(pygame.K_RIGHT),
+        "Up": Key(pygame.K_UP),
+        "Down": Key(pygame.K_DOWN)}
 
 gui = GUI()
 tape = Tape()
@@ -37,7 +39,8 @@ while not done:
         if track_manip == "None":
             pass
         elif keys["Record"].pressed() and track_manip == "Record":
-            pass
+            if tape.signals["play"].is_set():
+                state = "Play and Record"
         elif keys["Right"].pressed() and track_manip == "FF":
             pass
         elif keys["Left"].pressed() and track_manip == "RW":
@@ -72,6 +75,7 @@ while not done:
                 elif keys["Record"].pressed():
                     # state = "Arm Record"
                     track_manip = "Record"
+                    tape.arm_record()
                 elif keys["Right"].pressed():
                     state = "Pause"
                     track_manip = "FF"
@@ -121,6 +125,7 @@ while not done:
                 elif keys["Record"].pressed():
                     # state = "Arm Record"
                     track_manip = "Record"
+                    tape.arm_record()
                 elif keys["Left"].pressed():
                     track_manip = "RW"
                     tape.rewind()
@@ -136,8 +141,7 @@ while not done:
                     state = "Stop"
                     tape.stop()
                 elif keys["Record"].pressed():
-                    state = "Reverse and Record"
-                    tape.record_reverse()
+                    track_manip = "Record"
                 elif keys["Left"].pressed():
                     track_manip = "RW"
                     tape.rewind()
@@ -187,6 +191,8 @@ while not done:
             gui.render_rw()
         elif track_manip == "Record" and state == "Play":
             gui.render_record()
+        elif track_manip == "Record" and state == "Reverse":
+            gui.render_record_reverse()
         elif track_manip == "Record" and (state == "Pause" or state == "Stop"):
             gui.render_arm_record()
         elif state == "Play":

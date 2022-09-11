@@ -50,6 +50,9 @@ class Tape:
                         self.record_chunk_reverse()
                     else:
                         self.play_chunk_reverse()
+            else:
+                if signals["record"].is_set():
+                    self.monitor_input_trigger()
 
     def play_chunk(self):
         data = self.track1.read_block()
@@ -69,10 +72,13 @@ class Tape:
         data = self.track1.record_block_reverse(recorded_chunk)
         self.stream.write(data)
 
-    def get_input_level(self):
+    def monitor_input_trigger(self):
         recorded_chunk = self.stream.read(self.track1.CHUNK_SIZE, exception_on_overflow=False)
         level = audioop.rms(recorded_chunk, self.track1.SAMPLE_WIDTH)
-        print(level)
+        if level > 10:
+            data = self.track1.record_block(recorded_chunk)
+            self.stream.write(data)
+            self.record()
 
     def play(self):
         self.signals["play"].set()
@@ -119,6 +125,12 @@ class Tape:
         self.signals["forward"].clear()
         self.signals["play"].set()
         self.signals["record"].clear()
+
+    def arm_record(self):
+        self.signals["fast"].clear()
+        self.signals["forward"].set()
+        self.signals["play"].clear()
+        self.signals["record"].set()
 
     def get_time(self):
         return self.track1.position * self.track1.CHUNK_SIZE / self.track1.AUDIO_RATE
