@@ -2,6 +2,7 @@ from track import Track
 from threading import Event, Thread
 import math
 import pyaudio
+import audioop
 
 
 class Tape:
@@ -67,6 +68,11 @@ class Tape:
         recorded_chunk = self.stream.read(self.track1.CHUNK_SIZE, exception_on_overflow=False)
         data = self.track1.record_block_reverse(recorded_chunk)
         self.stream.write(data)
+
+    def get_input_level(self):
+        recorded_chunk = self.stream.read(self.track1.CHUNK_SIZE, exception_on_overflow=False)
+        level = audioop.rms(recorded_chunk, self.track1.SAMPLE_WIDTH)
+        print(level)
 
     def play(self):
         self.signals["play"].set()

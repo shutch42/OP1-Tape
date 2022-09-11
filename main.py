@@ -33,7 +33,7 @@ while not done:
             tape.close()
             done = True
 
-        # Check for fast-forward/rewind states
+        # Check for temporary states
         if track_manip == "None":
             pass
         elif keys["Record"].pressed() and track_manip == "Record":
@@ -50,20 +50,28 @@ while not done:
                 tape.reverse()
             elif state == "Pause":
                 tape.pause()
-            else:
-                raise Exception("Track state is not valid after a speed change: " + state)
 
         if event.type == pygame.KEYDOWN:
             key = pygame.key.get_pressed()
             mods = pygame.key.get_mods()
 
-            if state == "Stop":
+            # Switch out of temporary recording if necessary
+            if track_manip == "Record":
+                if keys["Shift"].pressed() and keys["Play"].pressed():
+                    state = "Reverse and Record"
+                    tape.record_reverse()
+                elif keys["Play"].pressed():
+                    state = "Play and Record"
+                    tape.record()
+
+            elif state == "Stop":
                 print("Checking moves from state: Stop")
                 if keys["Play"].pressed():
                     state = "Play"
                     tape.play()
                 elif keys["Record"].pressed():
-                    state = "Arm Record"
+                    # state = "Arm Record"
+                    track_manip = "Record"
                 elif keys["Right"].pressed():
                     state = "Pause"
                     track_manip = "FF"
@@ -111,23 +119,14 @@ while not done:
                     state = "Stop"
                     tape.stop()
                 elif keys["Record"].pressed():
-                    state = "Arm Record"
+                    # state = "Arm Record"
+                    track_manip = "Record"
                 elif keys["Left"].pressed():
                     track_manip = "RW"
                     tape.rewind()
                 elif keys["Right"].pressed():
                     track_manip = "FF"
                     tape.fast_forward()
-            elif state == "Arm Record":
-                if keys["Shift"].pressed() and keys["Play"].pressed():
-                    state = "Reverse and Record"
-                    tape.record_reverse()
-                elif keys["Play"].pressed():
-                    state = "Play and Record"
-                    tape.record()
-                elif not keys["Record"].pressed():
-                    state = "Pause"
-                print("Checking moves from state: Arm Record")
             elif state == "Reverse":
                 print("Checking moves from state: Reverse")
                 if keys["Play"].pressed() and not keys["Shift"].pressed():
@@ -176,15 +175,20 @@ while not done:
 
     if state == "Stop":
         gui.update_clock("00:00:00")
-        gui.render_pause()
+        if track_manip == "Record":
+            gui.render_arm_record()
+        else:
+            gui.render_pause()
     else:
         gui.update_clock(tape.get_time_string())
         if track_manip == "FF":
             gui.render_ff()
         elif track_manip == "RW":
             gui.render_rw()
-        elif track_manip == "Record":
+        elif track_manip == "Record" and state == "Play":
             gui.render_record()
+        elif track_manip == "Record" and (state == "Pause" or state == "Stop"):
+            gui.render_arm_record()
         elif state == "Play":
             gui.render_play()
         elif state == "Pause":
