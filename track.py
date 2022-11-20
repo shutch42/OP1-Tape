@@ -8,7 +8,7 @@ audio_dir = Path("audio")
 
 class Track:
     # FIXME: Change to mono track when implemented in tape
-    CHUNK_SIZE = 512
+    CHUNK_SIZE = 256
     NUM_CHANNELS = 1
     SAMPLE_WIDTH = 2
     AUDIO_RATE = 44100
